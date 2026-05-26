@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "shopify": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "set -a && source /home/user/shopify-mcp-v1/.env && set +a && python3 /home/user/shopify-mcp-v1/server.py"
+      ],
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  }
+}

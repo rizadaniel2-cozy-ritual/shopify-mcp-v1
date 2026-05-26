@@ -1,0 +1,22 @@
+{
+  "name": "shopify-ai-toolkit",
+  "version": "1.0.0",
+  "description": "Connect Claude to your Shopify store — manage products, orders, customers, inventory, collections, fulfillments, and webhooks through natural language.",
+  "author": {
+    "name": "rizadaniel2-cozy-ritual"
+  },
+  "mcpServers": {
+    "shopify": {
+      "command": "python3",
+      "args": ["/home/user/shopify-mcp-v1/server.py"],
+      "env": {
+        "MCP_TRANSPORT": "stdio",
+        "SHOPIFY_STORE": "${SHOPIFY_STORE}",
+        "SHOPIFY_ACCESS_TOKEN": "${SHOPIFY_ACCESS_TOKEN}",
+        "SHOPIFY_CLIENT_ID": "${SHOPIFY_CLIENT_ID:-}",
+        "SHOPIFY_CLIENT_SECRET": "${SHOPIFY_CLIENT_SECRET:-}",
+        "SHOPIFY_API_VERSION": "${SHOPIFY_API_VERSION:-2024-10}"
+      }
+    }
+  }
+}
