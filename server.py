@@ -77,18 +77,19 @@ class TokenManager:
         self._expires_at: float   = 0.0
         self._lock = asyncio.Lock()
 
-        self._use_client_credentials = bool(client_id and client_secret)
-
-        if self._use_client_credentials:
-            logger.info("Token mode: client_credentials (auto-refresh enabled)")
-        elif static_token:
-            logger.info("Token mode: static SHOPIFY_ACCESS_TOKEN (no auto-refresh)")
-            self._access_token = static_token
-            self._expires_at   = float("inf")
+        # Static token always takes priority over client credentials
+        if static_token:
+            logger.info("Token mode: static SHOPIFY_ACCESS_TOKEN")
+            self._access_token           = static_token
+            self._expires_at             = float("inf")
+            self._use_client_credentials = False
+        elif client_id and client_secret:
+            logger.info("Token mode: OAuth (visit /connect to authenticate)")
+            self._use_client_credentials = True
         else:
             logger.warning(
-                "No credentials configured. Set SHOPIFY_ACCESS_TOKEN or "
-                "SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET."
+                "No credentials configured. Set SHOPIFY_ACCESS_TOKEN, "
+                "or visit /connect after setting SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET."
             )
 
     @property
@@ -104,26 +105,17 @@ class TokenManager:
         async with self._lock:
             if not self.is_expired:
                 return self._access_token
-
-            if self._use_client_credentials:
-                await self._refresh_token()
-            elif not self._access_token:
-                raise RuntimeError(
-                    "No valid token available. "
-                    "Set SHOPIFY_ACCESS_TOKEN in your environment variables."
-                )
+            raise RuntimeError(
+                "No valid Shopify token. Visit /connect on your Railway deployment "
+                "to authenticate, then save the token as SHOPIFY_ACCESS_TOKEN."
+            )
 
         return self._access_token
 
     async def force_refresh(self) -> str:
-        if not self._use_client_credentials:
-            raise RuntimeError(
-                "Cannot refresh — using a static token. "
-                "Set SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET to enable auto-refresh."
-            )
-        async with self._lock:
-            await self._refresh_token()
-        return self._access_token
+        raise RuntimeError(
+            "Token refresh not supported. Visit /connect to re-authenticate."
+        )
 
     def set_token(self, token: str) -> None:
         """Directly set a token (used after OAuth callback)."""
