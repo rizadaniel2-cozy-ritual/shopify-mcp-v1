@@ -5,20 +5,23 @@ Provides tools for managing products, orders, customers, collections,
 inventory, and fulfillments through the Shopify Admin REST API.
 
 Token Management:
-  - Uses client_credentials grant to auto-generate and refresh tokens
-  - Set SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET (recommended for OAuth apps)
-  - Falls back to static SHOPIFY_ACCESS_TOKEN if client credentials not set
+  - Set SHOPIFY_ACCESS_TOKEN for a static token (shpat_... or atkn_...)
+  - Set SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET and visit /connect to do
+    a one-time OAuth flow that generates a permanent access token.
 """
 import json
 import os
 import logging
 import time
 import asyncio
+import urllib.parse
 from typing import Optional, List, Dict, Any
 from enum import Enum
 import httpx
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from mcp.server.fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import HTMLResponse, RedirectResponse
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -122,41 +125,12 @@ class TokenManager:
             await self._refresh_token()
         return self._access_token
 
-    async def _refresh_token(self) -> None:
-        url = f"https://{self._store}.myshopify.com/admin/oauth/access_token"
-        logger.info("Refreshing Shopify access token via client_credentials grant...")
-
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                url,
-                data={
-                    "grant_type":    "client_credentials",
-                    "client_id":     self._client_id,
-                    "client_secret": self._client_secret,
-                },
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-                timeout=15.0,
-            )
-
-            if resp.status_code != 200:
-                logger.error(f"Token refresh failed ({resp.status_code}): {resp.text[:500]}")
-                raise RuntimeError(
-                    f"Token refresh failed ({resp.status_code}). "
-                    "Check SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET."
-                )
-
-            data               = resp.json()
-            self._access_token = data["access_token"]
-            expires_in         = data.get("expires_in", 86399)
-            self._expires_at   = time.time() + expires_in
-
-            scope         = data.get("scope", "")
-            scope_preview = scope[:80] + "..." if len(scope) > 80 else scope
-            logger.info(
-                f"Token refreshed. Expires in {expires_in}s "
-                f"({expires_in // 3600}h {(expires_in % 3600) // 60}m). "
-                f"Scopes: {scope_preview}"
-            )
+    def set_token(self, token: str) -> None:
+        """Directly set a token (used after OAuth callback)."""
+        self._access_token = token
+        self._expires_at   = float("inf")
+        self._use_client_credentials = False
+        logger.info("Access token updated via OAuth flow.")
 
 
 # Global token manager
@@ -928,6 +902,90 @@ async def shopify_create_webhook(params: CreateWebhookInput) -> str:
         return _fmt(data.get("webhook", data))
     except Exception as e:
         return _error(e)
+
+
+# ---------------------------------------------------------------------------
+# OAuth connect flow  (/connect → Shopify → /callback)
+# ---------------------------------------------------------------------------
+
+OAUTH_SCOPES = (
+    "read_products,write_products,"
+    "read_orders,write_orders,"
+    "read_customers,write_customers,"
+    "read_inventory,write_inventory,"
+    "read_fulfillments,write_fulfillments"
+)
+
+
+@mcp.custom_route("/connect", methods=["GET"])
+async def oauth_connect(request: Request) -> RedirectResponse:
+    """Kick off the Shopify OAuth flow. Visit this URL once to connect."""
+    if not SHOPIFY_CLIENT_ID:
+        return HTMLResponse(
+            "<h2>Error</h2><p>SHOPIFY_CLIENT_ID is not set. "
+            "Add it to your Railway environment variables.</p>",
+            status_code=500,
+        )
+    base   = str(request.base_url).rstrip("/")
+    params = urllib.parse.urlencode({
+        "client_id":    SHOPIFY_CLIENT_ID,
+        "scope":        OAUTH_SCOPES,
+        "redirect_uri": f"{base}/callback",
+    })
+    return RedirectResponse(
+        f"https://{SHOPIFY_STORE}.myshopify.com/admin/oauth/authorize?{params}"
+    )
+
+
+@mcp.custom_route("/callback", methods=["GET"])
+async def oauth_callback(request: Request) -> HTMLResponse:
+    """Shopify redirects here after the user approves. Exchanges code for token."""
+    code = request.query_params.get("code")
+    if not code:
+        error = request.query_params.get("error_description", "No code received")
+        return HTMLResponse(f"<h2>OAuth Error</h2><p>{error}</p>", status_code=400)
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.post(
+            f"https://{SHOPIFY_STORE}.myshopify.com/admin/oauth/access_token",
+            json={
+                "client_id":     SHOPIFY_CLIENT_ID,
+                "client_secret": SHOPIFY_CLIENT_SECRET,
+                "code":          code,
+            },
+            timeout=15.0,
+        )
+
+    if resp.status_code != 200:
+        return HTMLResponse(
+            f"<h2>Token exchange failed ({resp.status_code})</h2><pre>{resp.text}</pre>",
+            status_code=500,
+        )
+
+    token = resp.json().get("access_token", "")
+    if not token:
+        return HTMLResponse(
+            f"<h2>No token in response</h2><pre>{resp.text}</pre>",
+            status_code=500,
+        )
+
+    token_manager.set_token(token)
+    logger.info("OAuth token obtained and activated.")
+
+    return HTMLResponse(f"""<!DOCTYPE html>
+<html><head><title>Shopify Connected</title></head>
+<body style="font-family:sans-serif;max-width:600px;margin:60px auto;padding:0 20px">
+  <h1>&#10003; Connected to Shopify!</h1>
+  <p>The server is live. Copy the token below and save it as
+     <strong>SHOPIFY_ACCESS_TOKEN</strong> in your Railway environment
+     variables so it survives restarts.</p>
+  <textarea rows="3" style="width:100%;font-family:monospace;font-size:13px"
+    onclick="this.select()">{token}</textarea>
+  <p style="color:#666;font-size:14px">
+    In Railway: open your project &#8594; Variables &#8594; add
+    <code>SHOPIFY_ACCESS_TOKEN</code> with the value above &#8594; Save &amp; redeploy.
+  </p>
+</body></html>""")
 
 
 # ---------------------------------------------------------------------------
