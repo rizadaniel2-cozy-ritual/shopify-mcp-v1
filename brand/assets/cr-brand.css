@@ -1,0 +1,24 @@
+/* CozyRitual Brand CSS — upload to Shopify theme assets as "cr-brand.css"
+   Then add  {{ 'cr-brand.css' | asset_url | stylesheet_tag }}  to theme.liquid <head>
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+/* Brand tokens */
+:root {
+  --cr-ink:          #1a1410;
+  --cr-ink-soft:     #4a3f36;
+  --cr-ink-muted:    #8a7d72;
+  --cr-cream:        #faf7f2;
+  --cr-cream-dark:   #f0ebe2;
+  --cr-warm:         #e8ddd0;
+  --cr-accent:       #7c5c3e;
+  --cr-accent-soft:  #b08a6e;
+  --cr-gold:         #c9a96e;
+  --cr-font-serif:   'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --cr-font-sans:    'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Base overrides for brand pages */
+body { background-color: var(--cr-cream); }

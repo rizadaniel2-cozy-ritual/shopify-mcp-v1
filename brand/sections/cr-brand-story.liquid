@@ -1,0 +1,162 @@
+<section class="cr-story" id="cr-story-{{ section.id }}">
+  <div class="cr-story__inner">
+    <div class="cr-story__content">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="cr-story__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="cr-story__heading">{{ section.settings.heading }}</h2>
+      <div class="cr-story__body">
+        {%- if section.settings.body_1 != blank -%}
+          <p>{{ section.settings.body_1 }}</p>
+        {%- endif -%}
+        {%- if section.settings.body_2 != blank -%}
+          <p>{{ section.settings.body_2 }}</p>
+        {%- endif -%}
+      </div>
+      {%- if section.settings.cta_label != blank -%}
+        <a href="{{ section.settings.cta_url }}" class="cr-story__cta">{{ section.settings.cta_label }}</a>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.image != blank -%}
+      <div class="cr-story__media">
+        {{ section.settings.image | image_url: width: 900 | image_tag: loading: 'lazy', alt: section.settings.heading, class: 'cr-story__img' }}
+      </div>
+    {%- else -%}
+      <div class="cr-story__media cr-story__media--placeholder">
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'cr-story__placeholder' }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.cr-story {
+  background: #faf7f2;
+  padding: 80px 24px;
+}
+.cr-story__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+@media (max-width: 800px) {
+  .cr-story__inner { grid-template-columns: 1fr; gap: 40px; }
+  .cr-story__media { order: -1; }
+}
+.cr-story__eyebrow {
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #7c5c3e;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.cr-story__heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(26px, 4vw, 44px);
+  font-weight: 500;
+  color: #1a1410;
+  line-height: 1.15;
+  margin-bottom: 28px;
+  padding-left: 20px;
+  border-left: 3px solid #c9a96e;
+}
+.cr-story__body p {
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  color: #4a3f36;
+  line-height: 1.82;
+  margin-bottom: 16px;
+  font-weight: 300;
+}
+.cr-story__body p:last-child { margin-bottom: 0; }
+.cr-story__cta {
+  display: inline-block;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7c5c3e;
+  text-decoration: none;
+  border-bottom: 1px solid #c9a96e;
+  padding-bottom: 3px;
+  margin-top: 30px;
+  letter-spacing: 0.04em;
+  transition: color 0.18s;
+}
+.cr-story__cta:hover { color: #1a1410; }
+.cr-story__media {
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+}
+.cr-story__media--placeholder {
+  background: #f0ebe2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cr-story__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cr-story__placeholder { width: 50%; height: 50%; opacity: 0.25; }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "CR Brand Story",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Our philosophy"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "This isn't skincare. It's a ritual."
+    },
+    {
+      "type": "textarea",
+      "id": "body_1",
+      "label": "Paragraph 1",
+      "default": "Most beauty products ask you to be patient for 3 months. Ours ask you for 10 minutes tonight. Clinical technology, wrapped in the kind of warmth you already expect from CozyRitual."
+    },
+    {
+      "type": "textarea",
+      "id": "body_2",
+      "label": "Paragraph 2",
+      "default": "No cold clinical packaging. No complicated steps. Just you, your device, and a result you can see by morning."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "Choose your ritual →"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA URL"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Side image"
+    }
+  ],
+  "presets": [
+    { "name": "CR Brand Story" }
+  ]
+}
+{% endschema %}

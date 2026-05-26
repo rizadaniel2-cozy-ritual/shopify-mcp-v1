@@ -697,6 +697,201 @@ async def shopify_get_collection_products(params: GetCollectionProductsInput) ->
         return _error(e)
 
 
+class CreateCollectionInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    title:       str            = Field(..., description="Collection title, e.g. 'Ritual Tools'")
+    body_html:   Optional[str]  = Field(default=None, description="Description HTML")
+    sort_order:  Optional[str]  = Field(default=None, description="manual, best-selling, alpha-asc, alpha-desc, price-asc, price-desc, created-asc, created-desc")
+    published:   Optional[bool] = Field(default=True)
+
+
+@mcp.tool(
+    name="shopify_create_collection",
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
+)
+async def shopify_create_collection(params: CreateCollectionInput) -> str:
+    """Create a new custom collection."""
+    try:
+        payload: Dict[str, Any] = {"title": params.title, "published": params.published}
+        if params.body_html:
+            payload["body_html"] = params.body_html
+        if params.sort_order:
+            payload["sort_order"] = params.sort_order
+        data = await _request("POST", "custom_collections.json", body={"custom_collection": payload})
+        return _fmt(data.get("custom_collection", data))
+    except Exception as e:
+        return _error(e)
+
+
+class AddProductToCollectionInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    collection_id: int = Field(..., description="Custom collection ID")
+    product_id:    int = Field(..., description="Product ID to add")
+
+
+@mcp.tool(
+    name="shopify_add_product_to_collection",
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_add_product_to_collection(params: AddProductToCollectionInput) -> str:
+    """Add a product to a custom collection via a collect record."""
+    try:
+        data = await _request(
+            "POST", "collects.json",
+            body={"collect": {"collection_id": params.collection_id, "product_id": params.product_id}},
+        )
+        return _fmt(data.get("collect", data))
+    except Exception as e:
+        return _error(e)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# THEMES
+# ═══════════════════════════════════════════════════════════════════════════
+
+class ListThemesInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+@mcp.tool(
+    name="shopify_list_themes",
+    annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_list_themes(params: ListThemesInput) -> str:
+    """List all themes. The active/published theme has role='main'."""
+    try:
+        data   = await _request("GET", "themes.json")
+        themes = data.get("themes", [])
+        return _fmt({"count": len(themes), "themes": themes})
+    except Exception as e:
+        return _error(e)
+
+
+class ListThemeAssetsInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    theme_id: int = Field(..., description="Theme ID (from shopify_list_themes)")
+
+
+@mcp.tool(
+    name="shopify_list_theme_assets",
+    annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_list_theme_assets(params: ListThemeAssetsInput) -> str:
+    """List all asset keys in a theme (sections, snippets, assets, templates, etc.)."""
+    try:
+        data   = await _request("GET", f"themes/{params.theme_id}/assets.json")
+        assets = data.get("assets", [])
+        return _fmt({"count": len(assets), "asset_keys": [a.get("key") for a in assets]})
+    except Exception as e:
+        return _error(e)
+
+
+class GetThemeAssetInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    theme_id:  int = Field(..., description="Theme ID")
+    asset_key: str = Field(..., description="Asset key, e.g. 'sections/hero.liquid' or 'config/settings_data.json'")
+
+
+@mcp.tool(
+    name="shopify_get_theme_asset",
+    annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_get_theme_asset(params: GetThemeAssetInput) -> str:
+    """Get the full content of a specific theme file (Liquid, JSON, CSS, JS)."""
+    try:
+        data  = await _request("GET", f"themes/{params.theme_id}/assets.json",
+                               params={"asset[key]": params.asset_key})
+        asset = data.get("asset", {})
+        return _fmt(asset)
+    except Exception as e:
+        return _error(e)
+
+
+class UpdateThemeAssetInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    theme_id:  int = Field(..., description="Theme ID")
+    asset_key: str = Field(..., description="Asset key, e.g. 'sections/cr-hero-banner.liquid'")
+    value:     str = Field(..., description="Full file content to write (Liquid, JSON, CSS, etc.)")
+
+
+@mcp.tool(
+    name="shopify_update_theme_asset",
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_update_theme_asset(params: UpdateThemeAssetInput) -> str:
+    """Create or update a theme file. Use to upload custom Liquid sections, update settings_data.json, add CSS assets, etc."""
+    try:
+        data = await _request(
+            "PUT", f"themes/{params.theme_id}/assets.json",
+            body={"asset": {"key": params.asset_key, "value": params.value}},
+        )
+        return _fmt(data.get("asset", data))
+    except Exception as e:
+        return _error(e)
+
+
+class DeleteThemeAssetInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    theme_id:  int = Field(..., description="Theme ID")
+    asset_key: str = Field(..., description="Asset key to delete")
+
+
+@mcp.tool(
+    name="shopify_delete_theme_asset",
+    annotations={"readOnlyHint": False, "destructiveHint": True, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_delete_theme_asset(params: DeleteThemeAssetInput) -> str:
+    """Delete a theme asset file. Destructive — cannot be undone."""
+    try:
+        await _request("DELETE", f"themes/{params.theme_id}/assets.json",
+                       params={"asset[key]": params.asset_key})
+        return _fmt({"deleted": params.asset_key, "theme_id": params.theme_id})
+    except Exception as e:
+        return _error(e)
+
+
+class GetThemeSettingsInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    theme_id: int = Field(..., description="Theme ID")
+
+
+@mcp.tool(
+    name="shopify_get_theme_settings",
+    annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_get_theme_settings(params: GetThemeSettingsInput) -> str:
+    """Get the theme's settings_data.json — contains all colour, font, and layout customisations."""
+    try:
+        data  = await _request("GET", f"themes/{params.theme_id}/assets.json",
+                               params={"asset[key]": "config/settings_data.json"})
+        asset = data.get("asset", {})
+        return _fmt(asset)
+    except Exception as e:
+        return _error(e)
+
+
+class UpdateThemeSettingsInput(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    theme_id:      int  = Field(..., description="Theme ID")
+    settings_json: str  = Field(..., description="Full JSON string for config/settings_data.json")
+
+
+@mcp.tool(
+    name="shopify_update_theme_settings",
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
+)
+async def shopify_update_theme_settings(params: UpdateThemeSettingsInput) -> str:
+    """Update the theme's config/settings_data.json. Controls all global theme settings (colours, fonts, layout). Always fetch current settings first with shopify_get_theme_settings before overwriting."""
+    try:
+        data = await _request(
+            "PUT", f"themes/{params.theme_id}/assets.json",
+            body={"asset": {"key": "config/settings_data.json", "value": params.settings_json}},
+        )
+        return _fmt(data.get("asset", data))
+    except Exception as e:
+        return _error(e)
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # INVENTORY
 # ═══════════════════════════════════════════════════════════════════════════
@@ -905,7 +1100,9 @@ OAUTH_SCOPES = (
     "read_orders,write_orders,"
     "read_customers,write_customers,"
     "read_inventory,write_inventory,"
-    "read_fulfillments,write_fulfillments"
+    "read_fulfillments,write_fulfillments,"
+    "read_themes,write_themes,"
+    "read_content,write_content"
 )
 
 

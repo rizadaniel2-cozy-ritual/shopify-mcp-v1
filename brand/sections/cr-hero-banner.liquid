@@ -1,0 +1,276 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+<section class="cr-hero" id="cr-hero-{{ section.id }}" aria-label="{{ section.settings.headline_line1 }}">
+  <div class="cr-hero__inner">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="cr-hero__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+
+    <h1 class="cr-hero__headline">
+      {{- section.settings.headline_line1 -}}
+      {%- if section.settings.headline_italic != blank -%}
+        <br><em>{{ section.settings.headline_italic }}</em>
+      {%- endif -%}
+    </h1>
+
+    {%- if section.settings.subheadline != blank -%}
+      <p class="cr-hero__sub">{{ section.settings.subheadline }}</p>
+    {%- endif -%}
+
+    <div class="cr-hero__ctas">
+      <a href="{{ section.settings.cta_primary_url }}" class="cr-hero__btn cr-hero__btn--primary">
+        {{ section.settings.cta_primary_label }}
+      </a>
+      {%- if section.settings.cta_secondary_label != blank -%}
+        <a href="{{ section.settings.cta_secondary_url }}" class="cr-hero__btn cr-hero__btn--secondary">
+          {{ section.settings.cta_secondary_label }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank -%}
+      <div class="cr-hero__trust">
+        {%- if section.settings.trust_1 != blank -%}
+          <span class="cr-hero__trust-item">{{ section.settings.trust_1 }}</span>
+        {%- endif -%}
+        {%- if section.settings.trust_2 != blank -%}
+          <span class="cr-hero__trust-item">{{ section.settings.trust_2 }}</span>
+        {%- endif -%}
+        {%- if section.settings.trust_3 != blank -%}
+          <span class="cr-hero__trust-item">{{ section.settings.trust_3 }}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if section.settings.background_image != blank -%}
+    <div class="cr-hero__bg" aria-hidden="true">
+      {{ section.settings.background_image | image_url: width: 1600 | image_tag: loading: 'eager', fetchpriority: 'high', class: 'cr-hero__bg-img' }}
+      <div class="cr-hero__bg-overlay"></div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% stylesheet %}
+:root {
+  --cr-ink: #1a1410;
+  --cr-ink-soft: #4a3f36;
+  --cr-ink-muted: #8a7d72;
+  --cr-cream: #faf7f2;
+  --cr-cream-dark: #f0ebe2;
+  --cr-warm: #e8ddd0;
+  --cr-accent: #7c5c3e;
+  --cr-gold: #c9a96e;
+  --cr-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --cr-font-sans: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.cr-hero {
+  background: var(--cr-cream);
+  padding: 80px 24px 88px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cr-hero__inner {
+  max-width: 740px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+.cr-hero__eyebrow {
+  font-family: var(--cr-font-sans);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cr-accent);
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+.cr-hero__headline {
+  font-family: var(--cr-font-serif);
+  font-size: clamp(38px, 7vw, 72px);
+  font-weight: 500;
+  line-height: 1.07;
+  color: var(--cr-ink);
+  margin-bottom: 22px;
+}
+.cr-hero__headline em {
+  font-style: italic;
+  color: var(--cr-accent);
+}
+.cr-hero__sub {
+  font-family: var(--cr-font-sans);
+  font-size: 17px;
+  color: var(--cr-ink-soft);
+  line-height: 1.7;
+  max-width: 540px;
+  margin: 0 auto 36px;
+  font-weight: 300;
+}
+.cr-hero__ctas {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.cr-hero__btn {
+  display: inline-block;
+  font-family: var(--cr-font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 14px 30px;
+  transition: opacity 0.2s, transform 0.2s;
+  letter-spacing: 0.04em;
+}
+.cr-hero__btn:hover { opacity: 0.82; transform: translateY(-1px); }
+.cr-hero__btn--primary {
+  background: var(--cr-ink);
+  color: var(--cr-cream);
+}
+.cr-hero__btn--secondary {
+  background: transparent;
+  color: var(--cr-ink);
+  border: 1px solid var(--cr-warm);
+}
+.cr-hero__trust {
+  display: flex;
+  gap: 8px 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  border-top: 1px solid var(--cr-warm);
+}
+.cr-hero__trust-item {
+  font-family: var(--cr-font-sans);
+  font-size: 12px;
+  color: var(--cr-ink-muted);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cr-hero__trust-item::before {
+  content: '✦';
+  color: var(--cr-gold);
+  font-size: 9px;
+}
+.cr-hero__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.cr-hero__bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.cr-hero__bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(250,247,242,0.88);
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "CR Hero Banner",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Premium at-home beauty rituals"
+    },
+    {
+      "type": "text",
+      "id": "headline_line1",
+      "label": "Headline",
+      "default": "Your skin deserves a ritual,"
+    },
+    {
+      "type": "text",
+      "id": "headline_italic",
+      "label": "Headline — italic second line",
+      "default": "not just a routine."
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "Science-backed beauty tools for the woman who takes 10 minutes for herself every evening. Visible results. No appointment needed."
+    },
+    {
+      "type": "header",
+      "content": "Primary CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_label",
+      "label": "Button label",
+      "default": "Start your ritual →"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Secondary CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_label",
+      "label": "Button label",
+      "default": "See how it works"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Trust strip"
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Trust item 1",
+      "default": "Free shipping on every order"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Trust item 2",
+      "default": "30-day money-back guarantee"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Trust item 3",
+      "default": "4.8★ from 2,400+ women"
+    },
+    {
+      "type": "header",
+      "content": "Background image (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    }
+  ],
+  "presets": [
+    { "name": "CR Hero Banner" }
+  ]
+}
+{% endschema %}

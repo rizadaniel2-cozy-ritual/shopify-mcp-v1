@@ -1,0 +1,178 @@
+<section class="cr-social" id="cr-social-{{ section.id }}">
+  <div class="cr-social__inner">
+    <blockquote class="cr-social__quote">
+      <p class="cr-social__quote-text">{{ section.settings.quote_text }}</p>
+      <footer class="cr-social__quote-footer">
+        <span class="cr-social__stars" aria-label="5 stars">★★★★★</span>
+        <cite class="cr-social__author">{{ section.settings.quote_author }}</cite>
+      </footer>
+    </blockquote>
+
+    <div class="cr-social__stats">
+      <div class="cr-social__stat">
+        <span class="cr-social__stat-val">{{ section.settings.stat_1_val }}</span>
+        <span class="cr-social__stat-label">{{ section.settings.stat_1_label }}</span>
+      </div>
+      <div class="cr-social__stat-divider" aria-hidden="true"></div>
+      <div class="cr-social__stat">
+        <span class="cr-social__stat-val">{{ section.settings.stat_2_val }}</span>
+        <span class="cr-social__stat-label">{{ section.settings.stat_2_label }}</span>
+      </div>
+      <div class="cr-social__stat-divider" aria-hidden="true"></div>
+      <div class="cr-social__stat">
+        <span class="cr-social__stat-val">{{ section.settings.stat_3_val }}</span>
+        <span class="cr-social__stat-label">{{ section.settings.stat_3_label }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.cr-social {
+  background: #f0ebe2;
+  padding: 72px 24px 76px;
+  text-align: center;
+}
+.cr-social__inner { max-width: 780px; margin: 0 auto; }
+.cr-social__quote {
+  margin: 0 0 52px;
+  padding: 0;
+}
+.cr-social__quote-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(18px, 3vw, 26px);
+  font-style: italic;
+  color: #1a1410;
+  line-height: 1.62;
+  margin-bottom: 22px;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.cr-social__quote-text::before { content: '\201C'; }
+.cr-social__quote-text::after  { content: '\201D'; }
+.cr-social__quote-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.cr-social__stars {
+  color: #c9a96e;
+  font-size: 14px;
+  letter-spacing: 3px;
+}
+.cr-social__author {
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  color: #8a7d72;
+  font-style: normal;
+}
+.cr-social__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding-top: 44px;
+  border-top: 1px solid #e8ddd0;
+}
+.cr-social__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 24px;
+}
+.cr-social__stat-divider {
+  width: 1px;
+  height: 48px;
+  background: #e8ddd0;
+  flex-shrink: 0;
+}
+.cr-social__stat-val {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 38px;
+  font-weight: 600;
+  color: #7c5c3e;
+  line-height: 1;
+}
+.cr-social__stat-label {
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11px;
+  color: #8a7d72;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+@media (max-width: 520px) {
+  .cr-social__stats { flex-direction: column; gap: 28px; }
+  .cr-social__stat-divider { width: 48px; height: 1px; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "CR Testimonial Strip",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Feature quote"
+    },
+    {
+      "type": "textarea",
+      "id": "quote_text",
+      "label": "Quote text",
+      "default": "I've had facials every month for 10 years. This wand made me cancel my appointment. My skin looks better, and I do it in my pyjamas."
+    },
+    {
+      "type": "text",
+      "id": "quote_author",
+      "label": "Author name & age",
+      "default": "Sarah M., 43"
+    },
+    {
+      "type": "header",
+      "content": "Stats"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_val",
+      "label": "Stat 1 — value",
+      "default": "2,400+"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Stat 1 — label",
+      "default": "Rituals started"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_val",
+      "label": "Stat 2 — value",
+      "default": "94%"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Stat 2 — label",
+      "default": "Would recommend"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_val",
+      "label": "Stat 3 — value",
+      "default": "14 days"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Stat 3 — label",
+      "default": "Avg. visible results"
+    }
+  ],
+  "presets": [
+    { "name": "CR Testimonial Strip" }
+  ]
+}
+{% endschema %}

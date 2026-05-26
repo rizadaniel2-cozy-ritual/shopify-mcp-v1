@@ -1,0 +1,206 @@
+<section class="cr-faq" id="cr-faq-{{ section.id }}">
+  <div class="cr-faq__inner">
+    <div class="cr-faq__header">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="cr-faq__eyebrow">{{ section.settings.eyebrow }}</p>
+      {%- endif -%}
+      <h2 class="cr-faq__heading">{{ section.settings.heading }}</h2>
+    </div>
+
+    <div class="cr-faq__list" role="list">
+      {%- for block in section.blocks -%}
+        <details class="cr-faq__item" {{ block.shopify_attributes }}>
+          <summary class="cr-faq__question">
+            <span>{{ block.settings.question }}</span>
+            <span class="cr-faq__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="cr-faq__answer">
+            <p>{{ block.settings.answer }}</p>
+          </div>
+        </details>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.cr-faq {
+  background: #faf7f2;
+  padding: 80px 24px;
+}
+.cr-faq__inner { max-width: 720px; margin: 0 auto; }
+.cr-faq__header { text-align: center; margin-bottom: 52px; }
+.cr-faq__eyebrow {
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #7c5c3e;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.cr-faq__heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 500;
+  color: #1a1410;
+  line-height: 1.18;
+}
+.cr-faq__item {
+  border-bottom: 1px solid #e8ddd0;
+}
+.cr-faq__item:first-of-type { border-top: 1px solid #e8ddd0; }
+.cr-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1410;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.cr-faq__question::-webkit-details-marker { display: none; }
+.cr-faq__icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  position: relative;
+  border-radius: 50%;
+  border: 1px solid #e8ddd0;
+}
+.cr-faq__icon::before,
+.cr-faq__icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: #7c5c3e;
+  border-radius: 2px;
+  transition: transform 0.24s ease;
+}
+.cr-faq__icon::before {
+  width: 10px;
+  height: 1.5px;
+  transform: translate(-50%, -50%);
+}
+.cr-faq__icon::after {
+  width: 1.5px;
+  height: 10px;
+  transform: translate(-50%, -50%);
+}
+details[open] .cr-faq__icon::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.cr-faq__answer {
+  padding-bottom: 22px;
+}
+.cr-faq__answer p {
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: #4a3f36;
+  line-height: 1.82;
+  font-weight: 300;
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "CR FAQ",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Questions & answers"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Everything you need to know"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "FAQ item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "How quickly will I see results?"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Answer",
+          "default": "Most women notice improved skin texture within the first 7–10 days. Visible lifting and definition typically becomes noticeable in weeks 3–4 with consistent daily use."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "CR FAQ",
+      "blocks": [
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "How quickly will I see results?",
+            "answer": "Most women notice improved skin texture within the first 7–10 days. Visible lifting and definition typically becomes noticeable in weeks 3–4 with consistent daily use. Results may vary — which is why we offer a 30-day money-back guarantee."
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "Is this the same technology as NuFACE?",
+            "answer": "Yes — the microcurrent technology uses the same clinical-grade frequency found in professional devices, at a fraction of the price. The main difference is the experience: CozyRitual is designed to feel like a warm evening ritual, not a clinical procedure."
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "Is it safe for sensitive skin?",
+            "answer": "Yes. All three devices are CE certified and safety tested. The microcurrent wand has 5 intensity levels so you can start gently and build up. If you have an implanted medical device such as a pacemaker, please consult your doctor before use."
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "Do I need any other products?",
+            "answer": "For the microcurrent wand, a conductive gel or serum improves results — we include guidance with every order. The LED wand and eye massager work on clean, dry skin with no additional products required."
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "What's your returns policy exactly?",
+            "answer": "30 days, no questions asked. If your skin doesn't look or feel different after consistent use, email us once and we refund you in full. No photographs, no return tracking, no lengthy explanations. One email."
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "How long does shipping take?",
+            "answer": "We ship from US and UK fulfilment centres. Standard delivery is 5–8 business days. All orders ship free — no minimum, no hidden charges."
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "Can I use these alongside my existing skincare?",
+            "answer": "Absolutely. Our devices are designed to work alongside your existing routine and amplify results. The LED wand and microcurrent wand both improve product absorption, so your serums and moisturisers work harder."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

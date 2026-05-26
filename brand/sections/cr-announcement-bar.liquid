@@ -1,0 +1,93 @@
+<div class="cr-ann" data-section-id="{{ section.id }}">
+  {%- assign messages = '' | split: '' -%}
+  {%- if section.settings.message_1 != blank -%}
+    {%- assign messages = messages | append: section.settings.message_1 | split: '||' -%}
+    {%- assign messages = messages | concat: section.settings.message_1 | split: '||' -%}
+  {%- endif -%}
+  <div class="cr-ann__track">
+    {%- if section.settings.message_1 != blank -%}
+      <span class="cr-ann__item cr-ann__item--active">{{ section.settings.message_1 }}</span>
+    {%- endif -%}
+    {%- if section.settings.message_2 != blank -%}
+      <span class="cr-ann__item">{{ section.settings.message_2 }}</span>
+    {%- endif -%}
+    {%- if section.settings.message_3 != blank -%}
+      <span class="cr-ann__item">{{ section.settings.message_3 }}</span>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+.cr-ann {
+  background: #1a1410;
+  color: #faf7f2;
+  text-align: center;
+  padding: 11px 24px;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  position: relative;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cr-ann__track { position: relative; height: 20px; }
+.cr-ann__item {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.cr-ann__item--active { opacity: 1; pointer-events: auto; }
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var section = document.querySelector('[data-section-id="{{ section.id }}"]');
+  if (!section) return;
+  var items = section.querySelectorAll('.cr-ann__item');
+  if (items.length < 2) return;
+  var idx = 0;
+  setInterval(function () {
+    items[idx].classList.remove('cr-ann__item--active');
+    idx = (idx + 1) % items.length;
+    items[idx].classList.add('cr-ann__item--active');
+  }, 4000);
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "CR Announcement Bar",
+  "tag": "div",
+  "class": "cr-announcement-bar-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "text",
+      "id": "message_1",
+      "label": "Message 1",
+      "default": "Free shipping on all orders · No minimum"
+    },
+    {
+      "type": "text",
+      "id": "message_2",
+      "label": "Message 2",
+      "default": "30-day money-back guarantee · Zero questions asked"
+    },
+    {
+      "type": "text",
+      "id": "message_3",
+      "label": "Message 3",
+      "default": "Try the ritual · 50% off your first device today"
+    }
+  ],
+  "presets": [
+    { "name": "CR Announcement Bar" }
+  ]
+}
+{% endschema %}
