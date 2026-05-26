@@ -926,7 +926,8 @@ async def oauth_connect(request: Request) -> RedirectResponse:
             "Add it to your Railway environment variables.</p>",
             status_code=500,
         )
-    base   = str(request.base_url).rstrip("/")
+    # Force https — Railway terminates TLS at the proxy so base_url sees http
+    base = str(request.base_url).rstrip("/").replace("http://", "https://")
     params = urllib.parse.urlencode({
         "client_id":    SHOPIFY_CLIENT_ID,
         "scope":        OAUTH_SCOPES,
